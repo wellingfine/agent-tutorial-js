@@ -1,0 +1,14 @@
+{
+  "name": "demo4-planning-demo-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo4（Planning Demo）的 JavaScript 移植版，接入 LM Studio",
+  "private": true,
+  "type": "module",
+  "main": "planning_demo.js",
+  "scripts": {
+    "start": "node planning_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

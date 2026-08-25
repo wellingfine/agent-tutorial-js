@@ -1,0 +1,14 @@
+{
+  "name": "demo2-memory-demo-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo2（Memory Demo）的 JavaScript 移植版，接入 LM Studio",
+  "private": true,
+  "type": "module",
+  "main": "memory_demo.js",
+  "scripts": {
+    "start": "node memory_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

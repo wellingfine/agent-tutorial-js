@@ -1,0 +1,14 @@
+{
+  "name": "demo7-coding-agent-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo7（Coding Agent Demo）的 JavaScript 移植版，复用 demo6 框架",
+  "private": true,
+  "type": "module",
+  "main": "coding_agent_demo.js",
+  "scripts": {
+    "start": "node coding_agent_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

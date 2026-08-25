@@ -1,0 +1,17 @@
+{
+  "name": "demo6-framework-demo-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo6（Framework Demo）的 JavaScript 移植版：最小 Agent Runtime + 工具注册 + 消息存储，接入 LM Studio",
+  "private": true,
+  "type": "module",
+  "main": "framework_demo.js",
+  "scripts": {
+    "start": "node framework_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
+  }
+}

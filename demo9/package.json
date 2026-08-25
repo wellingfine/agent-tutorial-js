@@ -1,0 +1,14 @@
+{
+  "name": "demo9-hitl-workflow-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo9（HITL Workflow Demo）的 JavaScript 移植版，复用 demo6 + demo8",
+  "private": true,
+  "type": "module",
+  "main": "hitl_demo.js",
+  "scripts": {
+    "start": "node hitl_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

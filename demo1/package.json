@@ -1,0 +1,13 @@
+{
+  "name": "demo1-hello-world-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo1（Hello World）的 JavaScript 移植版，接入 LM Studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node hello_world.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

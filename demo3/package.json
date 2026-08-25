@@ -1,0 +1,14 @@
+{
+  "name": "demo3-tool-calling-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo3（Tool Calling Demo）的 JavaScript 移植版，接入 LM Studio",
+  "private": true,
+  "type": "module",
+  "main": "tool_demo.js",
+  "scripts": {
+    "start": "node tool_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

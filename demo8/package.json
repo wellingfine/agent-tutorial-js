@@ -1,0 +1,14 @@
+{
+  "name": "demo8-workflow-agent-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo8（Workflow Agent Demo）的 JavaScript 移植版，复用 demo6 框架",
+  "private": true,
+  "type": "module",
+  "main": "workflow_demo.js",
+  "scripts": {
+    "start": "node workflow_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

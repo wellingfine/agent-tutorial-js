@@ -1,0 +1,17 @@
+{
+  "name": "demo10-rag-agent-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo10（RAG Agent Demo）的 JavaScript 移植版：LM Studio embeddings + pgvector/内存向量存储",
+  "private": true,
+  "type": "module",
+  "main": "rag_demo.js",
+  "scripts": {
+    "start": "node rag_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  }
+}

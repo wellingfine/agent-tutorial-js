@@ -1,0 +1,14 @@
+{
+  "name": "demo5-react-agent-js",
+  "version": "1.0.0",
+  "description": "agent-tutorial demo5（ReAct Demo）的 JavaScript 移植版，接入 LM Studio",
+  "private": true,
+  "type": "module",
+  "main": "react_demo.js",
+  "scripts": {
+    "start": "node react_demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
