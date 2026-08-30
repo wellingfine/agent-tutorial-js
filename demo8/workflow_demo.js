@@ -3,6 +3,8 @@ import { stdin, stdout } from "node:process";
 
 import { getApiKey } from "../demo6/framework/index.js";
 
+// demo8 复用 demo6 框架的模型调用层，LLM req/resp 日志也统一写在 demo6/llm_logs。
+import { LLM_LOG_DIR } from "../demo6/config.js";
 import { MAX_WORKFLOW_STEPS, WORKSPACE_DIR } from "./config.js";
 import { CodeWorkflowContext } from "./example_context.js";
 import { Workflow } from "./framework/index.js";
@@ -47,6 +49,7 @@ async function main() {
   console.log("Workflow Demo（JS 版）已启动。输入 exit 或 quit 结束。");
   console.log("你可以试试：帮我找到 utils.py 里的 greet_user，并把空名字处理改得更友好。");
   console.log(`工作区目录：${WORKSPACE_DIR}`);
+  console.log(`LLM 请求/响应日志目录：${LLM_LOG_DIR}`);
 
   const workflow = buildWorkflow();
   const rl = readline.createInterface({ input: stdin, output: stdout });

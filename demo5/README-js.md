@@ -4,7 +4,7 @@
 
 ## 本节目标
 
-- 理解 ReAct 如何在灵活性和可控性之间找平衡
+- 理解 ReAct(Reasoning + Acting) 如何在灵活性和可控性之间找平衡
 - 学会同时维护 `messages` 和结构化 `state`
 - 看懂一个带多工具、多轮观察的 Agent 主循环
 

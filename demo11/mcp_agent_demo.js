@@ -5,6 +5,9 @@ import { stdin, stdout } from "node:process";
 
 import { McpServerConfig, createRuntime, getApiKey } from "../demo6/framework/index.js";
 
+// demo11 复用 demo6 框架的模型调用层，LLM req/resp 日志也统一写在 demo6/llm_logs。
+import { LLM_LOG_DIR } from "../demo6/config.js";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function createMcpSystemMessage() {
@@ -40,6 +43,7 @@ async function main() {
   console.log("MCP Agent Demo（JS 版）已启动。输入 exit 或 quit 结束。");
   console.log("你可以试试：帮我查一下杭州今天的天气，并给我一个出行建议。");
   console.log("本节课的天气数据来自 demo11/weather_server.js 里的 MCP Server。");
+  console.log(`LLM 请求/响应日志目录：${LLM_LOG_DIR}`);
 
   const rl = readline.createInterface({ input: stdin, output: stdout });
 

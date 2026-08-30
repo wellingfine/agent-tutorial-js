@@ -3,6 +3,8 @@ import { stdin, stdout } from "node:process";
 
 import { askLlmText, getApiKey } from "../demo6/framework/index.js";
 
+// demo10 复用 demo6 框架的模型调用层，chat / embedding 的 req/resp 日志统一写在 demo6/llm_logs。
+import { LLM_LOG_DIR } from "../demo6/config.js";
 import { EMBEDDING_MODEL } from "./config.js";
 import { rebuildIndex, retrieve, usingPgvector } from "./rag_store.js";
 
@@ -57,6 +59,7 @@ async function main() {
   }
 
   console.log(`索引构建完成：documents=${result.documents}，chunks=${result.chunks}`);
+  console.log(`LLM 请求/响应日志目录：${LLM_LOG_DIR}`);
   console.log("输入 exit 或 quit 结束。");
   console.log("你可以试试：ReAct Agent 和普通聊天机器人有什么区别？");
 
