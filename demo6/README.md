@@ -1,74 +1,94 @@
-[返回首页](../README.md) | [上一节：demo5](../demo5/README.md) | [下一节：demo7](../demo7/README.md)
+# demo6（JS 版）：Framework Demo
 
-# demo6：Framework Demo
-
-这一节的重点不再是“再多一个 Agent 能力”，而是把前面几节的通用逻辑抽象出来。
+这是 [agent-tutorial demo6](https://github.com/) 的 JavaScript 移植版。重点不再是“再多一个 Agent 能力”，而是把通用逻辑抽象出来，接入 **LM Studio** 本地模型。
 
 ## 本节目标
 
 - 理解一个最小 Agent 框架通常会拆成哪些层
 - 学会把工具注册、消息存储、运行时循环解耦
 - 为后面的 coding agent、workflow、MCP 接入打好框架基础
+- 对话的时候，虽然只发了一句话，但会有几轮http调用，而且只有第一轮比较慢，因为有KVCache
 
-## 入口文件
+## 目录结构
 
-- [framework_demo.py](framework_demo.py)
-
-## 关键模块
-
-- [framework/__init__.py](framework/__init__.py)
-- [framework/runtime.py](framework/runtime.py)
-- [framework/tool_registry.py](framework/tool_registry.py)
-- [framework/message_store.py](framework/message_store.py)
-- [framework/decorators.py](framework/decorators.py)
-- [builtin_tools.py](builtin_tools.py)
+```
+demo6/
+  config.js            环境参数集中配置（API_URL / MODEL_NAME / 日志目录等）
+  builtin_tools.js     内置文件工具（create_text_file / read_text_file / list_files）
+  framework_demo.js    入口：交互式 REPL
+  framework/
+    index.js           框架统一出口
+    agent_types.js     ToolDefinition
+    decorators.js      tool(...) 声明工具（对应 Python 的 @tool）
+    helpers.js         createRuntime(...)
+    llm.js             模型通信层（LM Studio）+ req/resp 日志落盘
+    mcp_adapter.js     MCP stdio 工具适配（可选，懒加载）
+    message_store.js   会话消息与历史裁剪
+    runtime.js         AgentRuntime：ReAct 主循环
+    tool_registry.js   工具注册、schema 暴露与执行
+  generated_files/     工具可写目录（运行时自动创建）
+  llm_logs/            LLM 请求/响应日志（运行时自动创建）
+```
 
 ## 运行方式
 
-```powershell
-$env:DEEPSEEK_API_KEY="你的 API Key"
-```
+1. 启动 LM Studio，加载 `qwen/qwen3.5-9b`，并开启本地服务器
+   （默认地址 `http://127.0.0.1:1234`，可在 `config.js` 修改）
+2. 启动 demo：
 
 ```bash
-python demo6/framework_demo.py
+cd demo6
+node framework_demo.js   # 或 npm start
 ```
 
-## 本节新增能力
+LM Studio 默认不需要 API Key；若开启了鉴权，可设置环境变量：
+
+```bash
+export LMSTUDIO_API_KEY="你的 Key"
+```
+
+## LLM 请求/响应日志
+
+每次调用大模型，输入参数与返回结果都会写入 `demo6/llm_logs/`：
+
+- 命名格式：`YYYYMMDD-hhmmss-req.json` / `YYYYMMDD-hhmmss-resp.json`
+- 同一次调用的 req / resp 共享同一时间戳前缀，方便配对
+- 同一秒内多次调用会追加序号（如 `20260825-143025-2-req.json`）避免覆盖
+- `req.json` 是发往模型的完整请求体；`resp.json` 是模型返回的完整响应
+- 日志目录默认为 `demo6/llm_logs`，可用环境变量 `LLM_LOG_DIR` 重定向
+- 后续 demo（7-11）复用本框架的模型调用层，chat / embedding 日志也统一写在这里
+
+## 本节新增能力（与 Python 版一致）
 
 - 封装 `ToolRegistry`
 - 封装 `MessageStore`
-- 通过 `@tool` 装饰器声明工具
-- 通过 `create_runtime(...)` 快速组装一个最小 Agent Runtime
+- 通过 `tool(handler, options)` 声明工具
+- 通过 `createRuntime(...)` 快速组装一个最小 Agent Runtime
 - 让工具通过 `context_updates` 回写共享上下文
 
-## 建议阅读顺序
+## MCP 接入（可选）
 
-1. 先看 [framework_demo.py](framework_demo.py)
-2. 再看 [framework/__init__.py](framework/__init__.py)
-3. 再看 [framework/tool_registry.py](framework/tool_registry.py) 和 [framework/decorators.py](framework/decorators.py)
-4. 再看 [framework/runtime.py](framework/runtime.py)
-5. 最后回头看 [builtin_tools.py](builtin_tools.py)
+`framework/mcp_adapter.js` 懒加载 `@modelcontextprotocol/sdk`，不用 MCP 时无需安装。需要时：
 
-## 学习重点
+```bash
+cd demo6
+npm install @modelcontextprotocol/sdk
+```
 
-这一节的学习目标不是记住所有细节，而是理解下面这几个抽象层：
+然后在 `createRuntime({ mcpServers: [new McpServerConfig({ name, command, args })] })` 中传入即可。
 
-- 模型调用层
-- 工具注册层
-- 消息存储层
-- Runtime 执行层
-- 业务工具层
+## 与 Python 版的主要差异
 
-你也可以把它理解为：前五节都在造概念，第六节开始整理工程结构。
+| Python 版 | JS 版 |
+| --- | --- |
+| `@tool` 装饰器 + 类型注解自动生成 schema | `tool(handler, options)`，通过 `parameterDescriptions` + `parameterTypes` 声明 schema（JS 无类型注解） |
+| 工具函数按关键字参数调用（`**kwargs`） | 工具 handler 统一接收一个参数对象 |
+| `create_runtime(...)` 同步 | `createRuntime(...)` 为 async（MCP 加载需要异步握手） |
+| DeepSeek API（需要 API Key） | LM Studio 本地接口（无需 Key） |
+| 无请求日志 | 每次调用落盘 req/resp 日志到 `llm_logs/` |
 
 ## 建议练习
 
-- 新增一个你自己的 `@tool`
+- 新增一个你自己的 `tool(...)`
 - 给 Runtime 增加一个更严格的循环次数限制
 - 观察 `MessageStore` 和 `ToolRegistry` 如果换实现，会影响哪些地方
-
-## 与上一节相比多了什么
-
-`demo5` 还是“把逻辑写在 demo 里”，`demo6` 开始把这些通用能力抽成框架。后面的 `demo7`、`demo8`、`demo9` 和 `demo11`，都会直接复用这里的基础设施。
-
-[返回首页](../README.md) | [上一节：demo5](../demo5/README.md) | [下一节：demo7](../demo7/README.md)

@@ -1,42 +1,30 @@
-[返回首页](../README.md) | [上一节：demo4](../demo4/README.md) | [下一节：demo6](../demo6/README.md)
+# demo5（JS 版）：ReAct Demo
 
-# demo5：ReAct Demo
-
-这一节从“显式规划”过渡到更常见的 ReAct 风格循环。
+对应 Python 版 react_demo.py，接入 LM Studio。从“显式规划”过渡到更常见的 ReAct 风格循环。
 
 ## 本节目标
 
-- 理解 ReAct 如何在灵活性和可控性之间找平衡
+- 理解 ReAct(Reasoning + Acting) 如何在灵活性和可控性之间找平衡
 - 学会同时维护 `messages` 和结构化 `state`
 - 看懂一个带多工具、多轮观察的 Agent 主循环
 
-## 入口文件
+## 目录结构
 
-- [react_demo.py](react_demo.py)
-
-## 关键模块
-
-- [agent.py](agent.py)
-- [tools.py](tools.py)
-- [state.py](state.py)
+```
+demo5/
+  config.js        API_URL / MODEL_NAME / 循环与记忆参数 / GENERATED_FILES_DIR
+  llm.js           模型调用 + req/resp 日志落盘（demo5/llm_logs/）
+  state.js         结构化任务状态（createAgentState / updateStateFromToolResult）
+  tools.js         三个工具 + 安全路径解析 + executeToolCall
+  agent.js         ReAct 主循环（runReactAgent / buildRuntimeMessages / trimMessages）
+  react_demo.js    入口：交互式 REPL
+```
 
 ## 运行方式
 
-```powershell
-$env:DEEPSEEK_API_KEY="你的 API Key"
-```
-
 ```bash
-python demo5/react_demo.py
+node demo5/react_demo.js   # 或 cd demo5 && npm start
 ```
-
-## 本节新增能力
-
-- 模型根据上下文自行决定是否继续调用工具
-- `messages` 和记忆仍然保留
-- 额外引入 `state` 作为结构化任务状态
-- 工具从单一写文件扩展为“创建、读取、列出文件”
-- 通过循环多次观察工具结果，再决定下一步
 
 ## 内置工具
 
@@ -44,26 +32,22 @@ python demo5/react_demo.py
 - `read_text_file`
 - `list_files`
 
+## 与 Python 版的差异
+
+- `requests` → `fetch`；DeepSeek → LM Studio（无需 API Key）
+- 请求参数（`thinking` / `tool_choice` / `temperature` 等）与 Python 版一致
+- **system 消息合并**：Python 原版把系统提示词和状态摘要拆成两条 system 消息，
+  LM Studio 的 chat template 只认一条（两条会报 "No user query found in messages"），
+  JS 版把状态摘要合并进同一条 system 消息
+- **`list_files(".")` 修复**：Python 原版把 "." 转成空字符串传给 `resolve_safe_path`，
+  会直接报“路径不能为空”（与工具描述矛盾），JS 版修正为返回 generated_files 根目录
+- 每次调用的请求参数与返回结果落盘到 `demo5/llm_logs/`
+  （命名：`YYYYMMDD-hhmmss-req.json` / `YYYYMMDD-hhmmss-resp.json`）
+
 ## 学习重点
 
-- `run_react_agent()`：主循环如何驱动整个 Agent
-- `build_runtime_messages()`：为什么既需要 `messages`，也需要 `state`
-- `update_state_from_tool_result()`：工具结果如何反哺状态
+- `runReactAgent()`：主循环如何驱动整个 Agent
+- `buildRuntimeMessages()`：为什么既需要 `messages`，也需要 `state`
+- `updateStateFromToolResult()`：工具结果如何反哺状态
 
-这节是一个很好的分水岭。看到这里，你会开始理解：
-
-- 仅靠固定步骤也能做事，但灵活性有限
-- 仅靠自由 Tool Calling 又可能不够稳
-- ReAct 是在“灵活”和“可控”之间找平衡
-
-## 建议练习
-
-- 让 Agent 先生成文件，再自己读出来检查
-- 让 Agent 列出已有文件，再挑一个继续修改或总结
-- 尝试增加一个工具，观察主循环是否还能稳定工作
-
-## 与上一节相比多了什么
-
-`demo4` 更像显式状态机，`demo5` 则进入更常见的自由循环式 Agent。它没有完全放弃结构，而是把结构藏进运行时和状态里。
-
-[返回首页](../README.md) | [上一节：demo4](../demo4/README.md) | [下一节：demo6](../demo6/README.md)
+`demo4` 更像显式状态机，`demo5` 则进入更常见的自由循环式 Agent：没有完全放弃结构，而是把结构藏进运行时和状态里。
