@@ -333,7 +333,19 @@ export const replaceTextInFile = tool(
     const oldText = String(old_text ?? "");
     const newText = String(new_text ?? "");
     const expected = Number(expected_occurrences);
-    const occurrences = oldText === "" ? 0 : original.split(oldText).length - 1;
+
+    if (!oldText) {
+      return { ok: false, error: "old_text 不能为空。", path: targetPath };
+    }
+    if (!Number.isInteger(expected) || expected < 1) {
+      return {
+        ok: false,
+        error: "expected_occurrences 必须是大于 0 的整数。",
+        path: targetPath,
+      };
+    }
+
+    const occurrences = original.split(oldText).length - 1;
 
     if (occurrences !== expected) {
       return {

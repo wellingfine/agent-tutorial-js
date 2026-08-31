@@ -40,23 +40,30 @@ export class ApprovalNode extends BaseWorkflowNode {
       return "approved";
     }
 
-    const relativePath = String(ctx.patch_plan?.relative_path || ctx.target_file || "");
-    const oldText = String(ctx.patch_plan?.old_text || "");
-    const newText = String(ctx.patch_plan?.new_text || "");
-    const rationale = String(ctx.patch_plan?.rationale || "模型没有提供修改理由。");
+    const plan = ctx.patch_plan && typeof ctx.patch_plan === "object" ? ctx.patch_plan : {};
+    const relativePath = String(plan.relative_path || ctx.target_file || "").trim();
+    const oldText = Object.hasOwn(plan, "old_text") ? String(plan.old_text ?? "") : null;
+    const newText = Object.hasOwn(plan, "new_text") ? String(plan.new_text ?? "") : null;
+    const content = Object.hasOwn(plan, "content") ? plan.content : null;
+    const rationale = String(plan.rationale || "模型没有提供修改理由。");
 
     console.log("\n--- 待确认的修改计划 ---");
-    console.log(`目标文件：${relativePath}`);
+    console.log(`目标文件：${relativePath || "（缺失）"}`);
     console.log(`修改理由：${rationale}`);
 
-    if (oldText) {
+    if (oldText !== null) {
       console.log("\n将被替换的旧内容：");
       console.log(previewText(oldText));
     }
 
-    if (newText) {
+    if (newText !== null) {
       console.log("\n准备写入的新内容：");
-      console.log(previewText(newText));
+      console.log(newText ? previewText(newText) : "（空字符串，将删除上述旧内容）");
+    } else if (typeof content === "string") {
+      console.log("\n准备写入的完整文件内容：");
+      console.log(previewText(content));
+    } else {
+      console.log("\n警告：修改计划没有可执行的文本内容，后续执行将被拒绝。");
     }
 
     const answer = String(
@@ -104,10 +111,14 @@ export class SafeApplyNode extends BaseWorkflowNode {
     }
 
     const workspaceDir = String(ctx.workspace_dir);
-    const relativePath = String(ctx.patch_plan?.relative_path || ctx.target_file || "");
-    const oldText = String(ctx.patch_plan?.old_text || "");
-    const newText = String(ctx.patch_plan?.new_text || "");
-    const expectedOccurrences = Number(ctx.patch_plan?.expected_occurrences || 1);
+    const plan = ctx.patch_plan && typeof ctx.patch_plan === "object" ? ctx.patch_plan : {};
+    const relativePath = String(plan.relative_path || ctx.target_file || "").trim();
+    const hasOldText = Object.hasOwn(plan, "old_text");
+    const hasNewText = Object.hasOwn(plan, "new_text");
+    const hasContent = Object.hasOwn(plan, "content");
+    const oldText = hasOldText ? String(plan.old_text ?? "") : "";
+    const newText = hasNewText ? String(plan.new_text ?? "") : "";
+    const expectedOccurrences = Number(plan.expected_occurrences ?? 1);
 
     if (relativePath) {
       ctx.before_snapshot = await readTextFile({
@@ -118,7 +129,9 @@ export class SafeApplyNode extends BaseWorkflowNode {
     }
 
     let result;
-    if (oldText && newText) {
+    if (!relativePath) {
+      result = { ok: false, error: "修改计划缺少 relative_path。" };
+    } else if (hasOldText && hasNewText && oldText) {
       result = await replaceTextInFile({
         workspace_dir: workspaceDir,
         relative_path: relativePath,
@@ -126,13 +139,18 @@ export class SafeApplyNode extends BaseWorkflowNode {
         new_text: newText,
         expected_occurrences: expectedOccurrences,
       });
-    } else {
+    } else if (hasContent && typeof plan.content === "string") {
       result = await writeTextFile({
         workspace_dir: workspaceDir,
         relative_path: relativePath,
-        content: String(ctx.patch_plan?.content || ""),
+        content: plan.content,
         overwrite: true,
       });
+    } else {
+      result = {
+        ok: false,
+        error: "修改计划必须提供非空 old_text 和显式 new_text，或提供字符串 content。",
+      };
     }
 
     ctx.apply_result = result;

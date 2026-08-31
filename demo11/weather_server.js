@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 对应 Python 版的 weather_server.py：用 MCP SDK 暴露天气工具。
+// 使用 MCP SDK 暴露本地天气工具。
 //
 // 注意：stdio transport 用 stdout 传 JSON-RPC 消息，
 // 所以这个文件里绝对不能往 stdout 打印任何日志。
@@ -45,7 +45,7 @@ server.registerTool(
   },
   async ({ city }) => {
     const cleaned = String(city ?? "").trim();
-    const data = WEATHER_DATA[cleaned];
+    const data = Object.hasOwn(WEATHER_DATA, cleaned) ? WEATHER_DATA[cleaned] : null;
 
     if (!data) {
       const availableCities = Object.keys(WEATHER_DATA).join("、");

@@ -21,7 +21,7 @@ async function main() {
   console.log("Coding Agent Demo（JS 版）已启动。输入 exit 或 quit 结束。");
   console.log("你可以试试：帮我找到 greet_user 的实现，并给空名字加一个更友好的处理。");
   console.log(`工作区目录：${WORKSPACE_DIR}`);
-  console.log(`LLM 请求/响应日志目录：${LLM_LOG_DIR}`);
+  console.log(`LLM 请求/响应日志目录：${process.env.LLM_LOG_DIR || LLM_LOG_DIR}`);
   console.log(`当前会保留最近 ${MAX_HISTORY_TURNS} 轮会话记忆。`);
 
   const rl = readline.createInterface({ input: stdin, output: stdout });

@@ -25,7 +25,7 @@ async function main() {
   const apiKey = getApiKey();
   const serverPath = path.join(__dirname, "weather_server.js");
 
-  // MCP Server 用 node 直接拉起（对应 Python 版的 sys.executable + weather_server.py）。
+  // MCP Server 使用当前 Node.js 可执行文件启动，避免依赖 PATH 中的 node。
   const [runtime, messageStore] = await createRuntime({
     apiKey,
     mcpServers: [
@@ -43,7 +43,7 @@ async function main() {
   console.log("MCP Agent Demo（JS 版）已启动。输入 exit 或 quit 结束。");
   console.log("你可以试试：帮我查一下杭州今天的天气，并给我一个出行建议。");
   console.log("本节课的天气数据来自 demo11/weather_server.js 里的 MCP Server。");
-  console.log(`LLM 请求/响应日志目录：${LLM_LOG_DIR}`);
+  console.log(`LLM 请求/响应日志目录：${process.env.LLM_LOG_DIR || LLM_LOG_DIR}`);
 
   const rl = readline.createInterface({ input: stdin, output: stdout });
 

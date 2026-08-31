@@ -49,7 +49,7 @@ async function main() {
   console.log("Workflow Demo（JS 版）已启动。输入 exit 或 quit 结束。");
   console.log("你可以试试：帮我找到 utils.py 里的 greet_user，并把空名字处理改得更友好。");
   console.log(`工作区目录：${WORKSPACE_DIR}`);
-  console.log(`LLM 请求/响应日志目录：${LLM_LOG_DIR}`);
+  console.log(`LLM 请求/响应日志目录：${process.env.LLM_LOG_DIR || LLM_LOG_DIR}`);
 
   const workflow = buildWorkflow();
   const rl = readline.createInterface({ input: stdin, output: stdout });

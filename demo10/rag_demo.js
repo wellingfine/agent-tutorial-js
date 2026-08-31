@@ -59,7 +59,7 @@ async function main() {
   }
 
   console.log(`索引构建完成：documents=${result.documents}，chunks=${result.chunks}`);
-  console.log(`LLM 请求/响应日志目录：${LLM_LOG_DIR}`);
+  console.log(`LLM 请求/响应日志目录：${process.env.LLM_LOG_DIR || LLM_LOG_DIR}`);
   console.log("输入 exit 或 quit 结束。");
   console.log("你可以试试：ReAct Agent 和普通聊天机器人有什么区别？");
 

@@ -31,9 +31,13 @@ export class ClassifyNode extends BaseWorkflowNode {
       "如果用户只是想了解、总结或检查，intent 选择 summary。";
     const data = await askLlmJson(systemPrompt, `用户目标：${ctx.goal}`);
 
-    ctx.intent = String(data.intent || "edit");
-    ctx.target_file = data.target_file || null;
-    ctx.search_query = data.search_query || null;
+    ctx.intent = data.intent === "summary" ? "summary" : "edit";
+    ctx.target_file = typeof data.target_file === "string" && data.target_file.trim()
+      ? data.target_file.trim()
+      : null;
+    ctx.search_query = typeof data.search_query === "string" && data.search_query.trim()
+      ? data.search_query
+      : null;
     ctx.logs.push(`classify=${JSON.stringify(data)}`);
     return "inspect";
   }
@@ -120,13 +124,19 @@ export class ApplyNode extends BaseWorkflowNode {
 
   async run(ctx) {
     const workspaceDir = String(ctx.workspace_dir);
-    const relativePath = String(ctx.patch_plan?.relative_path || ctx.target_file || "");
-    const oldText = String(ctx.patch_plan?.old_text || "");
-    const newText = String(ctx.patch_plan?.new_text || "");
-    const expectedOccurrences = Number(ctx.patch_plan?.expected_occurrences || 1);
+    const plan = ctx.patch_plan && typeof ctx.patch_plan === "object" ? ctx.patch_plan : {};
+    const relativePath = String(plan.relative_path || ctx.target_file || "").trim();
+    const hasOldText = Object.hasOwn(plan, "old_text");
+    const hasNewText = Object.hasOwn(plan, "new_text");
+    const hasContent = Object.hasOwn(plan, "content");
+    const oldText = hasOldText ? String(plan.old_text ?? "") : "";
+    const newText = hasNewText ? String(plan.new_text ?? "") : "";
+    const expectedOccurrences = Number(plan.expected_occurrences ?? 1);
 
     let result;
-    if (oldText && newText) {
+    if (!relativePath) {
+      result = { ok: false, error: "修改计划缺少 relative_path。" };
+    } else if (hasOldText && hasNewText && oldText) {
       result = await replaceTextInFile({
         workspace_dir: workspaceDir,
         relative_path: relativePath,
@@ -134,13 +144,18 @@ export class ApplyNode extends BaseWorkflowNode {
         new_text: newText,
         expected_occurrences: expectedOccurrences,
       });
-    } else {
+    } else if (hasContent && typeof plan.content === "string") {
       result = await writeTextFile({
         workspace_dir: workspaceDir,
         relative_path: relativePath,
-        content: String(ctx.patch_plan?.content || ""),
+        content: plan.content,
         overwrite: true,
       });
+    } else {
+      result = {
+        ok: false,
+        error: "修改计划必须提供非空 old_text 和显式 new_text，或提供字符串 content。",
+      };
     }
 
     ctx.apply_result = result;

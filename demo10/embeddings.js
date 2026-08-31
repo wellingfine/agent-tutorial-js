@@ -2,7 +2,7 @@ import { LLM_LOG_DIR } from "../demo6/config.js";
 import { REQUEST_TIMEOUT_MS } from "../shared/config.js";
 import { createLlmLogSession } from "../shared/llm_log.js";
 
-import { EMBEDDING_API_URL, EMBEDDING_MODEL } from "./config.js";
+import { EMBEDDING_API_URL, EMBEDDING_DIMENSION, EMBEDDING_MODEL } from "./config.js";
 
 /**
  * 使用 LM Studio 的 embedding 模型把文本转成向量。
@@ -60,7 +60,20 @@ export async function embedTexts(texts) {
 
   // 返回的 data 顺序和 input 顺序一致，因此可以直接按 index 排序取出。
   const items = [...(parsed?.data || [])].sort((a, b) => a.index - b.index);
-  return items.map((item) => item.embedding);
+  if (items.length !== texts.length) {
+    throw new Error(`Embedding 返回数量不匹配：预期 ${texts.length}，实际 ${items.length}。`);
+  }
+
+  return items.map((item, index) => {
+    if (!Array.isArray(item.embedding) || item.embedding.length !== EMBEDDING_DIMENSION) {
+      throw new Error(`第 ${index + 1} 个 Embedding 维度不匹配，预期 ${EMBEDDING_DIMENSION} 维。`);
+    }
+    const embedding = item.embedding.map(Number);
+    if (embedding.some((value) => !Number.isFinite(value))) {
+      throw new Error(`第 ${index + 1} 个 Embedding 包含非有限数值。`);
+    }
+    return embedding;
+  });
 }
 
 // 查询文本也要使用同一个 embedding 模型，否则向量空间不一致。

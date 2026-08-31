@@ -25,7 +25,12 @@ export class RetrievedChunk {
 // 配置了 PGVECTOR_HOST / PGVECTOR_PASSWORD 时走 pgvector，
 // 否则退回进程内内存向量存储，保证 demo 零外部依赖即可跑通。
 export function usingPgvector() {
-  return Boolean(PGVECTOR_HOST && PGVECTOR_PASSWORD);
+  const hasHost = Boolean(PGVECTOR_HOST);
+  const hasPassword = Boolean(PGVECTOR_PASSWORD);
+  if (hasHost !== hasPassword) {
+    throw new Error("PGVECTOR_HOST 和 PGVECTOR_PASSWORD 必须同时配置，否则请都不配置以使用内存模式。");
+  }
+  return hasHost;
 }
 
 // ---------- pgvector 模式（对应 Python 版 psycopg + pgvector） ----------
@@ -68,7 +73,14 @@ async function withPgClient(action) {
 // 把数组转成 pgvector 可识别的文本格式：[0.1,0.2,0.3]
 // 这里不拼 SQL 结构，只把它作为参数传给 pg，再在 SQL 里显式转换为 vector。
 function vectorLiteral(embedding) {
-  return `[${embedding.map((value) => Number(value)).join(",")}]`;
+  if (!Array.isArray(embedding) || embedding.length !== EMBEDDING_DIMENSION) {
+    throw new Error(`Embedding 维度不匹配，预期 ${EMBEDDING_DIMENSION} 维。`);
+  }
+  const values = embedding.map(Number);
+  if (values.some((value) => !Number.isFinite(value))) {
+    throw new Error("Embedding 包含非有限数值。");
+  }
+  return `[${values.join(",")}]`;
 }
 
 // 初始化 pgvector 扩展和数据表。
@@ -122,30 +134,34 @@ async function rebuildIndexPg() {
   const embeddings = await embedTexts(chunks.map((chunk) => chunk.content));
 
   console.log("[4/5] 清空旧索引...");
-  await withPgClient(async (client) => {
-    await client.query(`TRUNCATE TABLE ${TABLE_NAME}`);
-  });
-
   console.log("[5/5] 写入 pgvector...");
   await withPgClient(async (client) => {
-    for (let index = 0; index < chunks.length; index += 1) {
-      const chunk = chunks[index];
-      await client.query(
-        `INSERT INTO ${TABLE_NAME} (id, source, chunk_index, content, embedding)
-         VALUES ($1, $2, $3, $4, $5::vector)
-         ON CONFLICT (id) DO UPDATE SET
-           source = EXCLUDED.source,
-           chunk_index = EXCLUDED.chunk_index,
-           content = EXCLUDED.content,
-           embedding = EXCLUDED.embedding`,
-        [
-          chunk.chunk_id,
-          chunk.source,
-          chunk.chunk_index,
-          chunk.content,
-          vectorLiteral(embeddings[index]),
-        ]
-      );
+    await client.query("BEGIN");
+    try {
+      await client.query(`TRUNCATE TABLE ${TABLE_NAME}`);
+      for (let index = 0; index < chunks.length; index += 1) {
+        const chunk = chunks[index];
+        await client.query(
+          `INSERT INTO ${TABLE_NAME} (id, source, chunk_index, content, embedding)
+           VALUES ($1, $2, $3, $4, $5::vector)
+           ON CONFLICT (id) DO UPDATE SET
+             source = EXCLUDED.source,
+             chunk_index = EXCLUDED.chunk_index,
+             content = EXCLUDED.content,
+             embedding = EXCLUDED.embedding`,
+          [
+            chunk.chunk_id,
+            chunk.source,
+            chunk.chunk_index,
+            chunk.content,
+            vectorLiteral(embeddings[index]),
+          ]
+        );
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
     }
   });
 
@@ -261,6 +277,9 @@ export async function rebuildIndex() {
 
 // 把用户问题转成向量，然后做相似度检索。
 export async function retrieve(query, topK = TOP_K) {
+  if (!Number.isInteger(topK) || topK < 1) {
+    throw new Error("topK 必须是大于 0 的整数。");
+  }
   if (usingPgvector()) {
     return retrievePg(query, topK);
   }
