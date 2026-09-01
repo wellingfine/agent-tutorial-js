@@ -17,9 +17,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // 工具可写目录：demo6/generated_files（与 Python 版保持一致）。
 export const GENERATED_FILES_DIR = path.join(__dirname, "generated_files");
 
-// LLM 请求/响应日志目录：默认 demo6/llm_logs，可用环境变量 LLM_LOG_DIR 重定向
-// （重定向逻辑见 shared/llm_log.js）。
-// demo6-11 复用本框架的模型调用层，LLM 日志统一写在这里。
+// demo6 自己的 LLM 请求/响应日志目录，可用环境变量 LLM_LOG_DIR 全局重定向。
+// demo7-11 复用框架代码，但会传入各自目录下的 llm_logs。
 export const LLM_LOG_DIR = path.join(__dirname, "llm_logs");
 
 export {

@@ -3,9 +3,7 @@ import { stdin, stdout } from "node:process";
 
 import { MessageStore, ToolRegistry, getApiKey } from "../demo6/framework/index.js";
 
-// demo7 复用 demo6 框架的模型调用层，LLM req/resp 日志也统一写在 demo6/llm_logs。
-import { LLM_LOG_DIR } from "../demo6/config.js";
-import { MAX_HISTORY_TURNS, WORKSPACE_DIR } from "./config.js";
+import { LLM_LOG_DIR, MAX_HISTORY_TURNS, WORKSPACE_DIR } from "./config.js";
 import { CodingAgentRuntime } from "./coding_runtime.js";
 import { registerCodingTools } from "./coding_tools.js";
 
@@ -14,8 +12,12 @@ async function main() {
   const registry = new ToolRegistry();
   registerCodingTools(registry);
 
-  // 这里直接复用 demo6 框架里的 ToolRegistry 和 MessageStore。
-  const runtime = new CodingAgentRuntime({ apiKey, toolRegistry: registry });
+  // 这里复用 demo6 框架，但日志仍写入 demo7 自己的目录。
+  const runtime = new CodingAgentRuntime({
+    apiKey,
+    toolRegistry: registry,
+    logDir: LLM_LOG_DIR,
+  });
   const messageStore = new MessageStore({ maxTurns: MAX_HISTORY_TURNS });
 
   console.log("Coding Agent Demo（JS 版）已启动。输入 exit 或 quit 结束。");

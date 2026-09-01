@@ -1,8 +1,12 @@
-import { LLM_LOG_DIR } from "../demo6/config.js";
 import { REQUEST_TIMEOUT_MS } from "../shared/config.js";
 import { createLlmLogSession } from "../shared/llm_log.js";
 
-import { EMBEDDING_API_URL, EMBEDDING_DIMENSION, EMBEDDING_MODEL } from "./config.js";
+import {
+  EMBEDDING_API_URL,
+  EMBEDDING_DIMENSION,
+  EMBEDDING_MODEL,
+  LLM_LOG_DIR,
+} from "./config.js";
 
 /**
  * 使用 LM Studio 的 embedding 模型把文本转成向量。
@@ -18,7 +22,7 @@ export async function embedTexts(texts) {
 
   const payload = { model: EMBEDDING_MODEL, input: texts };
 
-  // 与 demo6 框架的 chat 日志共用 demo6/llm_logs，方便一次会话的日志配对。
+  // Embedding 与 Chat 都写入 demo10/llm_logs，便于完整观察 RAG 流程。
   const logSession = createLlmLogSession({ logDir: LLM_LOG_DIR });
   const reqLogPath = await logSession.write("req", payload);
   console.log(`[Embedding 日志] 请求参数 -> ${reqLogPath}`);

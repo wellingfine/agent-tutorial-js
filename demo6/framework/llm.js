@@ -5,11 +5,12 @@ import {
   MODEL_NAME,
   REQUEST_TIMEOUT_MS,
 } from "../config.js";
+import { getLlmApiKey as getApiKey } from "../../shared/config.js";
 import { createLlmLogSession } from "../../shared/llm_log.js";
 
 // LM Studio 本地服务默认不校验鉴权，无需 API Key。
 // 如果你的 LM Studio 开启了 API Key 校验，可通过环境变量 LMSTUDIO_API_KEY 提供。
-export { getLlmApiKey as getApiKey } from "../../shared/config.js";
+export { getApiKey };
 
 export function createSystemMessage() {
   // 定义小型 Agent 框架默认使用的系统提示词。
@@ -36,8 +37,9 @@ export function createSystemMessage() {
  * 这一层只做“模型通信”，不做业务判断。
  * 这样 runtime、tool registry、tool handlers 都能保持边界清楚。
  *
- * 同时会把每次调用的输入参数与返回结果落盘到 LLM_LOG_DIR：
+ * 同时会把每次调用的输入参数与返回结果落盘到调用方指定的 logDir：
  *   YYYYMMDD-hhmmss-req.json  /  YYYYMMDD-hhmmss-resp.json
+ * 未指定时默认使用 demo6/llm_logs。
  */
 export async function callLlm({
   apiKey = getApiKey(),
@@ -46,6 +48,7 @@ export async function callLlm({
   apiUrl = API_URL,
   modelName = MODEL_NAME,
   maxCompletionTokens = MAX_TOKEN,
+  logDir = LLM_LOG_DIR,
 } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (apiKey) {
@@ -67,7 +70,7 @@ export async function callLlm({
 
   // 输入参数打 log：llm_logs/YYYYMMDD-hhmmss-req.json
   // （日志命名与落盘约定统一实现在 shared/llm_log.js）
-  const logSession = createLlmLogSession({ logDir: LLM_LOG_DIR });
+  const logSession = createLlmLogSession({ logDir });
   const reqLogPath = await logSession.write("req", payload);
   console.log(`[LLM 日志] 请求参数 -> ${reqLogPath}`);
 
@@ -129,11 +132,16 @@ export function buildMessages(systemPrompt, userContent) {
 
 // 请求模型返回普通文本。
 // 适合 workflow 节点内部的“一次性调用”场景。
-export async function askLlmText(systemPrompt, userContent, { apiKey = null } = {}) {
+export async function askLlmText(
+  systemPrompt,
+  userContent,
+  { apiKey = null, logDir = LLM_LOG_DIR } = {}
+) {
   const message = await callLlm({
     apiKey: apiKey ?? getApiKey(),
     messages: buildMessages(systemPrompt, userContent),
     tools: [],
+    logDir: logDir || LLM_LOG_DIR,
   });
   return message.content || "";
 }
@@ -142,8 +150,12 @@ export async function askLlmText(systemPrompt, userContent, { apiKey = null } = 
 // 这层封装的意义是：
 // - workflow 节点只关心“我要一个 JSON 结果”
 // - 不需要每个节点都重复写 parse 逻辑
-export async function askLlmJson(systemPrompt, userContent, { apiKey = null } = {}) {
-  let text = (await askLlmText(systemPrompt, userContent, { apiKey })).trim();
+export async function askLlmJson(
+  systemPrompt,
+  userContent,
+  { apiKey = null, logDir = LLM_LOG_DIR } = {}
+) {
+  let text = (await askLlmText(systemPrompt, userContent, { apiKey, logDir })).trim();
 
   if (text.startsWith("```")) {
     const lines = text.split("\n");

@@ -102,7 +102,7 @@ npm --prefix demo10 start
 
 ## 日志与安全边界
 
-Chat 和 Embedding 请求、响应默认写入 `demo6/llm_logs`，可通过 `LLM_LOG_DIR` 重定向。日志会包含问题、知识片段和模型响应，请勿提交含敏感资料的日志。
+Chat 和 Embedding 请求、响应默认写入 `demo10/llm_logs`，可通过 `LLM_LOG_DIR` 重定向。日志会包含问题、知识片段和模型响应，请勿提交含敏感资料的日志。
 
 生产环境还应限制数据库网络来源、使用最小权限数据库账号，并为外部模型端点配置访问控制。
 

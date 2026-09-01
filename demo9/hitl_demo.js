@@ -1,9 +1,7 @@
 import { getApiKey } from "../demo6/framework/index.js";
 import { Workflow } from "../demo8/framework/index.js";
 
-// demo9 复用 demo6 框架的模型调用层，LLM req/resp 日志也统一写在 demo6/llm_logs。
-import { LLM_LOG_DIR } from "../demo6/config.js";
-import { MAX_WORKFLOW_STEPS, WORKSPACE_DIR } from "./config.js";
+import { LLM_LOG_DIR, MAX_WORKFLOW_STEPS, WORKSPACE_DIR } from "./config.js";
 import { HitlWorkflowContext } from "./hitl_context.js";
 import {
   ApprovalNode,
@@ -70,7 +68,11 @@ async function main() {
       break;
     }
 
-    const ctx = new HitlWorkflowContext({ goal: trimmedGoal, workspace_dir: WORKSPACE_DIR });
+    const ctx = new HitlWorkflowContext({
+      goal: trimmedGoal,
+      workspace_dir: WORKSPACE_DIR,
+      log_dir: LLM_LOG_DIR,
+    });
     try {
       const result = await workflow.run(ctx);
       console.log("\n--- Workflow Logs ---");

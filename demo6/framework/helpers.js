@@ -15,6 +15,7 @@ export async function createRuntime({
   maxLoops = 8,
   maxTurns = 6,
   systemMessage = null,
+  logDir = null,
 } = {}) {
   const registry = new ToolRegistry();
 
@@ -37,6 +38,7 @@ export async function createRuntime({
     toolRegistry: registry,
     maxLoops,
     systemMessage,
+    logDir,
   });
 
   const messageStore = new MessageStore({ maxTurns });

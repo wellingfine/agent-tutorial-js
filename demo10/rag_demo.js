@@ -3,9 +3,7 @@ import { stdin, stdout } from "node:process";
 
 import { askLlmText, getApiKey } from "../demo6/framework/index.js";
 
-// demo10 复用 demo6 框架的模型调用层，chat / embedding 的 req/resp 日志统一写在 demo6/llm_logs。
-import { LLM_LOG_DIR } from "../demo6/config.js";
-import { EMBEDDING_MODEL } from "./config.js";
+import { EMBEDDING_MODEL, LLM_LOG_DIR } from "./config.js";
 import { rebuildIndex, retrieve, usingPgvector } from "./rag_store.js";
 
 // 把检索结果整理成适合塞进 prompt 的上下文文本。
@@ -40,7 +38,7 @@ async function answerWithRag(question) {
     "回答使用简洁清晰的中文。";
   const userContent = `用户问题：${question}\n\n可参考资料：\n${contextText}`;
 
-  return askLlmText(systemPrompt, userContent);
+  return askLlmText(systemPrompt, userContent, { logDir: LLM_LOG_DIR });
 }
 
 async function main() {

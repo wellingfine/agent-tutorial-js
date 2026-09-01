@@ -5,9 +5,10 @@ import { WorkflowContext } from "./framework/index.js";
 // 这里放的是“本地代码修改工作流”专用字段，
 // 不再污染 framework 层。
 export class CodeWorkflowContext extends WorkflowContext {
-  constructor({ goal, workspace_dir = "." }) {
+  constructor({ goal, workspace_dir = ".", log_dir = null }) {
     super({ goal });
     this.workspace_dir = workspace_dir;
+    this.log_dir = log_dir;
     this.intent = "edit";
     this.target_file = null;
     this.search_query = null;

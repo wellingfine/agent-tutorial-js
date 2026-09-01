@@ -5,10 +5,8 @@ import { stdin, stdout } from "node:process";
 
 import { McpServerConfig, createRuntime, getApiKey } from "../demo6/framework/index.js";
 
-// demo11 复用 demo6 框架的模型调用层，LLM req/resp 日志也统一写在 demo6/llm_logs。
-import { LLM_LOG_DIR } from "../demo6/config.js";
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const LLM_LOG_DIR = path.join(__dirname, "llm_logs");
 
 function createMcpSystemMessage() {
   return {
@@ -38,6 +36,7 @@ async function main() {
     maxLoops: 5,
     maxTurns: 6,
     systemMessage: createMcpSystemMessage(),
+    logDir: LLM_LOG_DIR,
   });
 
   console.log("MCP Agent Demo（JS 版）已启动。输入 exit 或 quit 结束。");

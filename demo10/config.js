@@ -12,6 +12,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const BASE_DIR = __dirname;
 export const KNOWLEDGE_BASE_DIR = path.join(__dirname, "knowledge_base");
+export const LLM_LOG_DIR = path.join(__dirname, "llm_logs");
 
 // pgvector 配置（与 Python 版一致，通过环境变量提供）。
 // 未配置 PGVECTOR_HOST / PGVECTOR_PASSWORD 时，自动退回内存向量存储。

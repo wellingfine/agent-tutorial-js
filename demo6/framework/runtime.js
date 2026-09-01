@@ -5,11 +5,12 @@ import { callLlm, createSystemMessage } from "./llm.js";
 // 第六课的核心，不是增加新能力，而是把前 1 到 5 课里已经验证过的能力
 // 抽成一个更通用的运行时。
 export class AgentRuntime {
-  constructor({ apiKey, toolRegistry, maxLoops = 8, systemMessage = null }) {
+  constructor({ apiKey, toolRegistry, maxLoops = 8, systemMessage = null, logDir = null }) {
     this.apiKey = apiKey;
     this.toolRegistry = toolRegistry;
     this.maxLoops = maxLoops;
     this.systemMessage = systemMessage;
+    this.logDir = logDir;
   }
 
   // 创建通用任务状态。
@@ -111,6 +112,7 @@ export class AgentRuntime {
         apiKey: this.apiKey,
         messages: requestMessages,
         tools: toolsPayload,
+        ...(this.logDir ? { logDir: this.logDir } : {}),
       });
       const toolCalls = assistantMessage.tool_calls || [];
 

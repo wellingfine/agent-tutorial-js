@@ -113,6 +113,19 @@ $env:PGVECTOR_PASSWORD="你的数据库密码"
 11. RAG 让 Agent 在回答前先查资料
 12. MCP 让 Agent 更容易接入标准化外部工具
 
+### demo8
+demo7 是“给模型工具，让模型自己想办法”；demo8 是“业务流程由程序掌控，只把需要语言理解的局部步骤交给模型”。
+
+例如修改代码必须经过： 检查 → 规划 → 修改 → 验证
+在 demo7 中，这只是系统提示词要求；模型仍可能不遵守。
+在 demo8 中，这是代码结构约束。ApplyNode 后面只能进入 VerifyNode：
+
+返回的reasoning_content 是给人看的推理，agent实现不需要管，只关注content
+
+没有tool_calls ，识别用户的目标，识别到之后，LLM返回需要的一系列操作，之后进入workflow状态，
+
+开放式 Coding Agent 更适合 demo7；必须稳定执行固定步骤的生产流程更适合 Workflow。
+
 ## 详细文档在哪里
 
 顶层 README 现在只保留总览和导航。每一节的完整讲解、关键模块、运行方式、学习重点和建议练习，都已经拆到对应的 `demoN/README.md` 里。

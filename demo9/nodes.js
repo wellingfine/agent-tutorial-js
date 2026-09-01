@@ -184,7 +184,7 @@ export class HitlReportNode extends BaseWorkflowNode {
       `执行结果：${JSON.stringify(ctx.apply_result)}\n` +
       `验证结果：${JSON.stringify(ctx.verification_result)}\n` +
       `日志：${JSON.stringify(ctx.logs)}\n`;
-    ctx.report = await askLlmText(systemPrompt, userContent);
+    ctx.report = await askLlmText(systemPrompt, userContent, { logDir: ctx.log_dir });
     return "done";
   }
 }

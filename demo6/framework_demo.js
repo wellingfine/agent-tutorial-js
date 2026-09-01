@@ -21,6 +21,7 @@ async function main() {
     toolModules: [builtinTools],
     maxLoops: MAX_AGENT_LOOPS,
     maxTurns: MAX_HISTORY_TURNS,
+    logDir: LLM_LOG_DIR,
   });
 
   console.log("Framework Demo（JS 版）已启动。输入 exit 或 quit 结束。");

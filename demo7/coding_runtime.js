@@ -10,12 +10,13 @@ import { MAX_AGENT_LOOPS, WORKSPACE_DIR } from "./config.js";
  * - 只通过覆写少数方法做“场景化定制”
  */
 export class CodingAgentRuntime extends AgentRuntime {
-  constructor({ apiKey, toolRegistry }) {
+  constructor({ apiKey, toolRegistry, logDir = null }) {
     super({
       apiKey,
       toolRegistry,
       maxLoops: MAX_AGENT_LOOPS,
       systemMessage: null,
+      logDir,
     });
     // JS 里 super() 之前不能访问 this，所以系统提示词在构造后再覆写。
     this.systemMessage = this.createCodingSystemMessage();

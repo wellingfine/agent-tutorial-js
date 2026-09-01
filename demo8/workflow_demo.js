@@ -3,9 +3,7 @@ import { stdin, stdout } from "node:process";
 
 import { getApiKey } from "../demo6/framework/index.js";
 
-// demo8 复用 demo6 框架的模型调用层，LLM req/resp 日志也统一写在 demo6/llm_logs。
-import { LLM_LOG_DIR } from "../demo6/config.js";
-import { MAX_WORKFLOW_STEPS, WORKSPACE_DIR } from "./config.js";
+import { LLM_LOG_DIR, MAX_WORKFLOW_STEPS, WORKSPACE_DIR } from "./config.js";
 import { CodeWorkflowContext } from "./example_context.js";
 import { Workflow } from "./framework/index.js";
 import {
@@ -78,7 +76,11 @@ async function main() {
       break;
     }
 
-    const ctx = new CodeWorkflowContext({ goal, workspace_dir: WORKSPACE_DIR });
+    const ctx = new CodeWorkflowContext({
+      goal,
+      workspace_dir: WORKSPACE_DIR,
+      log_dir: LLM_LOG_DIR,
+    });
     try {
       const result = await workflow.run(ctx);
       console.log("\n--- Workflow Logs ---");

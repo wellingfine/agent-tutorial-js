@@ -1,0 +1,14 @@
+{
+  "name": "agent-log-lens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "本地 Agent 教程日志分析工具",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

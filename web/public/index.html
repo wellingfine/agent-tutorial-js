@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="在本地还原和分析 Agent 教程中的 LLM 请求响应流程">
+  <title>Agent Log Lens</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <div>
+          <h1>Agent Log Lens</h1>
+          <p>把模型调用还原成可读的 Agent 运作流程</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="local-badge"><i></i> Local only</span>
+        <button class="icon-button" id="refreshButton" type="button" title="刷新日志" aria-label="刷新日志">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="demo-panel">
+        <div class="panel-heading">
+          <span>课程日志</span>
+          <span class="count-pill" id="demoTotal">0</span>
+        </div>
+        <nav id="demoList" class="demo-list" aria-label="Demo 列表"></nav>
+        <div class="learning-tip">
+          <span class="tip-icon">i</span>
+          <div><strong>阅读提示</strong><p>先看流程摘要，再按需展开原始 JSON。</p></div>
+        </div>
+      </aside>
+
+      <section class="session-panel">
+        <div class="session-header">
+          <div>
+            <p class="eyebrow" id="currentDemoLabel">DEMO</p>
+            <h2 id="currentDemoTitle">选择一个课程</h2>
+          </div>
+          <span id="sessionCount" class="subtle-count">0 次调用</span>
+        </div>
+        <label class="search-box">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="sessionSearch" type="search" placeholder="搜索时间或内容" autocomplete="off">
+        </label>
+        <div id="sessionList" class="session-list"></div>
+      </section>
+
+      <section class="detail-panel" id="detailPanel">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-orbit"><span></span></div>
+          <h2>选择一次模型调用</h2>
+          <p>查看 Prompt、消息上下文、模型思考、工具调用与 Token 消耗。</p>
+        </div>
+        <div class="detail-content hidden" id="detailContent">
+          <div class="detail-header">
+            <div>
+              <div class="crumbs"><span id="detailDemo">demo</span><b>/</b><span id="detailSession">session</span></div>
+              <h2 id="detailTitle">模型调用</h2>
+            </div>
+            <div class="detail-actions">
+              <button class="secondary-button" id="expandSmartButton" type="button">智能展开</button>
+              <button class="secondary-button" id="collapseAllButton" type="button">全部收起</button>
+            </div>
+          </div>
+
+          <div class="metric-grid" id="metricGrid"></div>
+
+          <div class="view-tabs" role="tablist" aria-label="日志视图">
+            <button class="view-tab active" type="button" data-view="flow">流程解析</button>
+            <button class="view-tab" type="button" data-view="json">原始 JSON</button>
+          </div>
+
+          <div id="flowView" class="view-pane"></div>
+          <div id="jsonView" class="view-pane hidden">
+            <div class="json-switcher">
+              <button class="json-kind active" type="button" data-kind="request">Request</button>
+              <button class="json-kind" type="button" data-kind="response">Response</button>
+              <label class="tree-search"><span>⌕</span><input id="treeSearch" type="search" placeholder="过滤键或内容"></label>
+            </div>
+            <div id="jsonTree" class="json-tree"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

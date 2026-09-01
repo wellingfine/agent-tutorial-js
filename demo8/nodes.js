@@ -29,7 +29,11 @@ export class ClassifyNode extends BaseWorkflowNode {
       "intent (summary 或 edit), target_file, search_query, reason。" +
       "如果用户明显要求修改代码或文件，intent 选择 edit。" +
       "如果用户只是想了解、总结或检查，intent 选择 summary。";
-    const data = await askLlmJson(systemPrompt, `用户目标：${ctx.goal}`);
+    const data = await askLlmJson(
+      systemPrompt,
+      `用户目标：${ctx.goal}`,
+      { logDir: ctx.log_dir }
+    );
 
     ctx.intent = data.intent === "summary" ? "summary" : "edit";
     ctx.target_file = typeof data.target_file === "string" && data.target_file.trim()
@@ -109,7 +113,7 @@ export class PlanNode extends BaseWorkflowNode {
       `目标文件：${ctx.target_file}\n` +
       `文件快照：${JSON.stringify(ctx.file_snapshot)}\n` +
       `搜索结果：${JSON.stringify(ctx.search_hits)}\n`;
-    const plan = await askLlmJson(systemPrompt, userContent);
+    const plan = await askLlmJson(systemPrompt, userContent, { logDir: ctx.log_dir });
     ctx.patch_plan = plan;
     ctx.logs.push(`plan=${JSON.stringify(plan)}`);
     return "apply";
@@ -208,7 +212,7 @@ export class ReportNode extends BaseWorkflowNode {
       `执行结果：${JSON.stringify(ctx.apply_result)}\n` +
       `验证结果：${JSON.stringify(ctx.verification_result)}\n` +
       `日志：${JSON.stringify(ctx.logs)}\n`;
-    ctx.report = await askLlmText(systemPrompt, userContent);
+    ctx.report = await askLlmText(systemPrompt, userContent, { logDir: ctx.log_dir });
     return "done";
   }
 }

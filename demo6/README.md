@@ -56,7 +56,7 @@ export LMSTUDIO_API_KEY="你的 Key"
 - 同一秒内多次调用会追加序号（如 `20260825-143025-2-req.json`）避免覆盖
 - `req.json` 是发往模型的完整请求体；`resp.json` 是模型返回的完整响应
 - 日志目录默认为 `demo6/llm_logs`，可用环境变量 `LLM_LOG_DIR` 重定向
-- 后续 demo（7-11）复用本框架的模型调用层，chat / embedding 日志也统一写在这里
+- 后续 demo（7-11）复用本框架的模型调用层，但默认写入各自的 `demoN/llm_logs`，便于区分课程来源
 
 ## 本节新增能力（与 Python 版一致）
 
