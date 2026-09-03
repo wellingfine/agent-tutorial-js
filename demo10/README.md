@@ -1,6 +1,7 @@
 [返回首页](../README.md) | [上一节：demo9](../demo9/README.md) | [下一节：demo11](../demo11/README.md)
 
 # demo10：RAG Agent Demo
+RAG 的全称是 Retrieval-Augmented Generation，中文翻译为检索增强生成。
 
 这一节把 Agent 从“只依赖上下文窗口”推进到“可以查询外部知识库”的形态，核心主题是 RAG。聊天和 Embedding 都通过 LM Studio 的 OpenAI 兼容接口完成。
 
@@ -10,6 +11,8 @@
 - 学会把文档切分、向量化、入库和检索串成完整链路
 - 理解 chunk 总数必须远大于 TOP_K，否则检索等于把整个知识库塞进 Prompt
 - 理解外部知识库为什么能降低凭空编造的概率
+- 理解RAG本质就是，提前通过向量比较，截取相关资料发给LLM，再由LLM输出
+- 一般会有专门的embedding 模型，不同的模型生成的向量不同，没法比例，所以每次向量化的时候要注意需要同一个模型
 
 ## 入口文件
 
